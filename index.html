@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Моё мини-приложение</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; background: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); }
+    .btn { background: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); padding: 12px 24px; border: none; border-radius: 12px; font-size: 16px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Привет, <span id="name">друг</span>!</h1>
+  <p>Твой username: <b id="username">@username</b></p>
+  <p>Ты зашёл из Telegram!</p>
+
+  <button class="btn" onclick="Telegram.WebApp.MainButton.setText('Отправить привет').show().onClick(sendData)">
+    Нажми меня
+  </button>
+
+  <script>
+    const user = Telegram.WebApp.initDataUnsafe.user;
+    if (user) {
+      document.getElementById('name').textContent = user.first_name;
+      document.getElementById('username').textContent = '@' + (user.username || 'нет username');
+    }
+
+    // Автоматически подстраиваем тему
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand();
+
+    function sendData() {
+      const data = {
+        text: `Привет от ${user.first_name}!`,
+        user_id: user.id
+      };
+      Telegram.WebApp.sendData(JSON.stringify(data));
+      Telegram.WebApp.close();
+    }
+  </script>
+</body>
+</html>
