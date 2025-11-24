@@ -1,0 +1,9 @@
+{
+    "name": "places-finder",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+      "dev": "echo 'Open index.html'",
+      "build": "echo 'Static site'"
+    }
+  }
