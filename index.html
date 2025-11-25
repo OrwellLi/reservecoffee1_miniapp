@@ -6,45 +6,7 @@
     <title>Reserve Coffee • Поиск мест</title>
 
     <!-- Динамическая загрузка Яндекс.Карт с безопасным ключом -->
-    <script>
-        // Функция загрузки Yandex Maps API
-        function loadYandexMaps() {
-            // Сначала пробуем взять ключ из Vercel (прод и превью)
-            let apiKey = import.meta.env?.VITE_YANDEX_API_KEY;
-
-            // Если локально — пытаемся подтянуть из .env.local (не попадёт в git)
-            if (!apiKey && location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-                fetch('/.env.local')
-                    .then(r => r.text())
-                    .then(text => {
-                        const match = text.match(/VITE_YANDEX_API_KEY\s*=\s*(.+)/);
-                        apiKey = match ? match[1].trim() : null;
-                        injectScript(apiKey);
-                    })
-                    .catch(() => injectScript(null));
-            } else {
-                injectScript(apiKey);
-            }
-
-            function injectScript(key) {
-                if (!key || key === 'fallback-key-if-local') {
-                    console.warn('Yandex API key не найден — карта не загрузится');
-                    document.body.innerHTML += '<div style="padding:20px;background:#fff;color:red;text-align:center;">Ошибка: не указан YANDEX_API_KEY</div>';
-                    return;
-                }
-
-                const script = document.createElement('script');
-                script.src = `https://api-maps.yandex.ru/v3/?apikey=${key}&lang=ru_RU`;
-                script.async = true;
-                script.onload = () => console.log('Yandex Maps API загружен');
-                script.onerror = () => console.error('Не удалось загрузить Yandex Maps API');
-                document.head.appendChild(script);
-            }
-        }
-
-        // Запускаем загрузку сразу
-        loadYandexMaps();
-    </script>
+    const apiKey = typeof import !== 'undefined' && import.meta.env?.VITE_YANDEX_API_KEY;
 
     <link rel="stylesheet" href="style.css" />
 </head>
