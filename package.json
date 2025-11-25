@@ -1,12 +1,8 @@
 {
-  "name": "reservecoffee-miniapp",
+  "name": "coffee-miniapp",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "node build-env.js",
-    "dev": "echo 'Open index.html'"
-  },
-  "devDependencies": {
-    "dotenv": "^16.4.5"
+    "build": "node replace-key.js"
   }
 }
