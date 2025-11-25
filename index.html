@@ -1,44 +1,47 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Reserve Coffee • Поиск мест</title>
-    <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Reserve Coffee</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <!-- Остальной HTML без изменений -->
-    <header><h1>Поиск кофеен рядом</h1></header>
-    <nav class="tabs">
-        <button class="tab-btn active" data-tab="nearby">Рядом</button>
-        <button class="tab-btn" data-tab="search">Поиск</button>
-        <button class="tab-btn" data-tab="favorites">Избранное</button>
-    </nav>
-    <main>
-        <section id="nearby" class="tab-content active">
-            <div id="nearby-map"></div>
-            <p id="geo-status" class="status">Определяем ваше местоположение...</p>
-        </section>
-        <section id="search" class="tab-content">
-            <div class="search-container">
-                <input type="text" id="search-input" placeholder="Название, адрес, метро..." />
-                <button id="search-btn">Найти</button>
-            </div>
-            <div id="search-map"></div>
-        </section>
-        <section id="favorites" class="tab-content">
-            <ul id="favorites-list"></ul>
-            <button id="clear-fav" class="danger-btn">Очистить всё</button>
-        </section>
-    </main>
+  <header><h1>Поиск кофеен рядом</h1></header>
 
-    <script src="script.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="nearby">Рядом</button>
+    <button class="tab-btn" data-tab="search">Поиск</button>
+    <button class="tab-btn" data-tab="favorites">Избранное</button>
+  </nav>
+
+  <main>
+    <section id="nearby" class="tab-content active">
+      <div id="nearby-map"></div>
+      <p id="geo-status">Определяем местоположение…</p>
+    </section>
+
+    <section id="search" class="tab-content">
+      <div class="search-container">
+        <input type="text" id="search-input" placeholder="Адрес, метро, название…" />
+        <button id="search-btn">Найти</button>
+      </div>
+      <div id="search-map"></div>
+    </section>
+
+    <section id="favorites" class="tab-content">
+      <ul id="favorites-list"></ul>
+      <button id="clear-fav" style="display:none;margin-top:20px;">Очистить избранное</button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
     if (window.Telegram?.WebApp) {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
+      Telegram.WebApp.ready();
+      Telegram.WebApp.expand();
     }
-</script>
+  </script>
 </body>
 </html>
