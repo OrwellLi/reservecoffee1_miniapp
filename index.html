@@ -3,8 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Reserve Coffee</title>
+  <title>ReserveCoffee</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- САМАЯ НАДЁЖНАЯ ЗАГРУЗКА ЯНДЕКС КАРТ 2025 -->
+  <script>
+    const KEY = "YOUR_YANDEX_KEY_WILL_BE_HERE";
+    if (KEY === "YOUR_YANDEX_KEY_WILL_BE_HERE") {
+      document.write("<h1 style='color:red;padding:50px;text-align:center'>ОШИБКА: ключ Яндекса не подставлен!</h1>");
+    } else {
+      const s = document.createElement("script");
+      s.src = `https://api-maps.yandex.ru/v3/?apikey=${KEY}&lang=ru_RU`;
+      s.async = true;
+      s.onload = () => console.log("Yandex Maps загружен");
+      s.onerror = () => alert("Не удалось загрузить Яндекс.Карты — проверь ключ и домен");
+      document.head.appendChild(s);
+    }
+  </script>
 </head>
 <body>
   <header><h1>Поиск кофеен рядом</h1></header>
@@ -17,31 +32,28 @@
 
   <main>
     <section id="nearby" class="tab-content active">
-      <div id="nearby-map"></div>
-      <p id="geo-status">Определяем местоположение…</p>
+      <div id="map" style="width:100%;height:60vh;"></div>
+      <p id="status" style="text-align:center;padding:10px;font-weight:bold;">Определяем местоположение…</p>
     </section>
 
     <section id="search" class="tab-content">
-      <div class="search-container">
-        <input type="text" id="search-input" placeholder="Адрес, метро, название…" />
-        <button id="search-btn">Найти</button>
+      <div class="search-box">
+        <input type="text" id="query" placeholder="Адрес, метро, кофейня…" />
+        <button id="searchBtn">Найти</button>
       </div>
-      <div id="search-map"></div>
+      <div id="searchMap" style="width:100%;height:60vh;margin-top:10px;"></div>
     </section>
 
     <section id="favorites" class="tab-content">
-      <ul id="favorites-list"></ul>
-      <button id="clear-fav" style="display:none;margin-top:20px;">Очистить избранное</button>
+      <ul id="favList"></ul>
     </section>
   </main>
 
   <script src="script.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
-    if (window.Telegram?.WebApp) {
-      Telegram.WebApp.ready();
-      Telegram.WebApp.expand();
-    }
+    Telegram?.WebApp?.ready();
+    Telegram?.WebApp?.expand();
   </script>
 </body>
 </html>

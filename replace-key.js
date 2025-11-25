@@ -1,21 +1,16 @@
-// replace-key.js
+// replace-key.js — запускается на Vercel
 const fs = require('fs');
 
 const key = process.env.VITE_YANDEX_API_KEY?.trim();
-
 if (!key) {
-  console.error('VITE_YANDEX_API_KEY не найден или пустой!');
+  console.error('VITE_YANDEX_API_KEY не найден!');
   process.exit(1);
 }
 
-console.log('Найден ключ Яндекса (первые 8 символов):', key.substring(0, 8) + '...');
+console.log('Ключ найден:', key.substring(0, 10) + '...');
 
-let content = fs.readFileSync('script.js', 'utf8');
+let html = fs.readFileSync('index.html', 'utf8');
+html = html.replace('YOUR_YANDEX_KEY_WILL_BE_HERE', key);
+fs.writeFileSync('index.html', html);
 
-if (content.includes('YOUR_KEY_WILL_BE_HERE')) {
-  content = content.replace('YOUR_KEY_WILL_BE_HERE', key);
-  fs.writeFileSync('script.js', content);
-  console.log('Ключ успешно подставлен в script.js');
-} else {
-  console.log('Ключ уже был подставлен ранее');
-}
+console.log('Ключ успешно подставлен в index.html');
