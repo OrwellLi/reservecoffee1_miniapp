@@ -1,7 +1,6 @@
 {
-  "name": "coffee-miniapp",
+  "name": "reservecoffee",
   "version": "1.0.0",
-  "private": true,
   "scripts": {
     "build": "node replace-key.js"
   }

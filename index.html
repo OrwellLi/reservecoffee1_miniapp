@@ -1,59 +1,27 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ReserveCoffee</title>
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- САМАЯ НАДЁЖНАЯ ЗАГРУЗКА ЯНДЕКС КАРТ 2025 -->
   <script>
-    const KEY = "YOUR_YANDEX_KEY_WILL_BE_HERE";
-    if (KEY === "YOUR_YANDEX_KEY_WILL_BE_HERE") {
-      document.write("<h1 style='color:red;padding:50px;text-align:center'>ОШИБКА: ключ Яндекса не подставлен!</h1>");
+    // Яндекс.Карты будут загружены только если ключ подставлен
+    const API_KEY = "DEBUG_PLACEHOLDER_YANDEX_KEY";
+
+    if (API_KEY === "DEBUG_PLACEHOLDER_YANDEX_KEY") {
+      document.write("<h1 style='color:red;padding:50px;text-align:center;background:#000'>КЛЮЧ НЕ ПОДСТАВЛЕН!<br>Смотри Build Logs в Vercel</h1>");
     } else {
-      const s = document.createElement("script");
-      s.src = `https://api-maps.yandex.ru/v3/?apikey=${KEY}&lang=ru_RU`;
-      s.async = true;
-      s.onload = () => console.log("Yandex Maps загружен");
-      s.onerror = () => alert("Не удалось загрузить Яндекс.Карты — проверь ключ и домен");
-      document.head.appendChild(s);
+      const script = document.createElement("script");
+      script.src = `https://api-maps.yandex.ru/v3/?apikey=${API_KEY}&lang=ru_RU`;
+      script.async = true;
+      script.onload = () => document.write("<h1 style='color:lime;background:#000;padding:50px;text-align:center'>Яндекс.Карты загружены успешно!</h1>");
+      script.onerror = () => document.write("<h1 style='color:red;background:#000;padding:50px;text-align:center'>ОШИБКА загрузки API (ключ неверный или ограничен)</h1>");
+      document.head.appendChild(script);
     }
   </script>
 </head>
-<body>
-  <header><h1>Поиск кофеен рядом</h1></header>
-
-  <nav class="tabs">
-    <button class="tab-btn active" data-tab="nearby">Рядом</button>
-    <button class="tab-btn" data-tab="search">Поиск</button>
-    <button class="tab-btn" data-tab="favorites">Избранное</button>
-  </nav>
-
-  <main>
-    <section id="nearby" class="tab-content active">
-      <div id="map" style="width:100%;height:60vh;"></div>
-      <p id="status" style="text-align:center;padding:10px;font-weight:bold;">Определяем местоположение…</p>
-    </section>
-
-    <section id="search" class="tab-content">
-      <div class="search-box">
-        <input type="text" id="query" placeholder="Адрес, метро, кофейня…" />
-        <button id="searchBtn">Найти</button>
-      </div>
-      <div id="searchMap" style="width:100%;height:60vh;margin-top:10px;"></div>
-    </section>
-
-    <section id="favorites" class="tab-content">
-      <ul id="favList"></ul>
-    </section>
-  </main>
-
-  <script src="script.js"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script>
-    Telegram?.WebApp?.ready();
-    Telegram?.WebApp?.expand();
-  </script>
+<body style="background:#000;color:#0f0;font-family:monospace;">
+  <h2>Если видишь это — скрипт Яндекса ещё не загрузился</h2>
+  <p>Смотри Build Logs в Vercel — там будет вся правда</p>
 </body>
 </html>
