@@ -1,10 +1,16 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "**/*",
-        "use": "@vercel/static"
-      }
-    ],
-    "outputDirectory": "."
-  }
+  "version": 2,
+  "public": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api-maps.yandex.ru https://yandex.ru https://suggest-maps.yandex.ru; connect-src 'self' https://api-maps.yandex.ru https://yandex.ru https://suggest-maps.yandex.ru; img-src 'self' data: https://*.maps.yandex.net https://yandex.ru; style-src 'self' 'unsafe-inline' blob: https://yandex.ru; frame-src https://api-maps.yandex.ru blob:; child-src https://api-maps.yandex.ru blob: https://mc.yandex.ru;"
+        },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ]
+}

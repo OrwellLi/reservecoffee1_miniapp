@@ -1,46 +1,102 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Поиск мест</title>
-    <script src="https://api-maps.yandex.ru/v3/?apikey=ТВОЙ_API_КЛЮЧ&lang=ru_RU" type="text/javascript"></script> <!-- ← ВСТАВЬ СВОЙ КЛЮЧ ЗДЕСЬ! -->
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Reserve Coffee • Поиск мест</title>
+
+    <!-- Динамическая загрузка Яндекс.Карт с безопасным ключом -->
+    <script>
+        // Функция загрузки Yandex Maps API
+        function loadYandexMaps() {
+            // Сначала пробуем взять ключ из Vercel (прод и превью)
+            let apiKey = import.meta.env?.VITE_YANDEX_API_KEY;
+
+            // Если локально — пытаемся подтянуть из .env.local (не попадёт в git)
+            if (!apiKey && location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                fetch('/.env.local')
+                    .then(r => r.text())
+                    .then(text => {
+                        const match = text.match(/VITE_YANDEX_API_KEY\s*=\s*(.+)/);
+                        apiKey = match ? match[1].trim() : null;
+                        injectScript(apiKey);
+                    })
+                    .catch(() => injectScript(null));
+            } else {
+                injectScript(apiKey);
+            }
+
+            function injectScript(key) {
+                if (!key || key === 'fallback-key-if-local') {
+                    console.warn('Yandex API key не найден — карта не загрузится');
+                    document.body.innerHTML += '<div style="padding:20px;background:#fff;color:red;text-align:center;">Ошибка: не указан YANDEX_API_KEY</div>';
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = `https://api-maps.yandex.ru/v3/?apikey=${key}&lang=ru_RU`;
+                script.async = true;
+                script.onload = () => console.log('Yandex Maps API загружен');
+                script.onerror = () => console.error('Не удалось загрузить Yandex Maps API');
+                document.head.appendChild(script);
+            }
+        }
+
+        // Запускаем загрузку сразу
+        loadYandexMaps();
+    </script>
+
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
     <header>
-        <h1>Поиск мест рядом</h1>
+        <h1>Поиск кофеен рядом</h1>
     </header>
-    
+
     <nav class="tabs">
         <button class="tab-btn active" data-tab="nearby">Рядом</button>
         <button class="tab-btn" data-tab="search">Поиск</button>
         <button class="tab-btn" data-tab="favorites">Избранное</button>
     </nav>
-    
+
     <main>
         <!-- Вкладка 1: Рядом -->
         <section id="nearby" class="tab-content active">
-            <div id="nearby-map" style="width: 100%; height: 400px;"></div>
-            <p id="geo-status">Получаем вашу позицию...</p>
+            <div id="nearby-map"></div>
+            <p id="geo-status" class="status">Определяем ваше местоположение...</p>
         </section>
-        
+
         <!-- Вкладка 2: Поиск -->
         <section id="search" class="tab-content">
             <div class="search-container">
-                <input type="text" id="search-input" placeholder="Введите название или адрес">
+                <input type="text" id="search-input" placeholder="Название, адрес, метро..." autocomplete="off" />
                 <button id="search-btn">Найти</button>
             </div>
-            <div id="search-map" style="width: 100%; height: 400px;"></div>
+            <div id="search-map"></div>
         </section>
-        
+
         <!-- Вкладка 3: Избранное -->
         <section id="favorites" class="tab-content">
+            <div id="favorites-empty" class="empty-state" style="display:none;">
+                <p>У вас пока нет избранных мест</p>
+            </div>
             <ul id="favorites-list"></ul>
-            <button id="clear-fav">Очистить избранное</button>
+            <button id="clear-fav" class="danger-btn" style="display:none;">Очистить всё</button>
         </section>
     </main>
-    
-    <script src="script.js"></script>
+
+    <!-- Подключаем основной скрипт -->
+    <script type="module" src="script.js"></script>
+
+    <!-- Telegram WebApp интеграция (обязательно в конце) -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+            Telegram.WebApp.ready();
+            Telegram.WebApp.expand();
+            // Можно добавить MainButton позже в script.js
+        }
+    </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 const { Bot, InlineKeyboard } = require('grammy');
 
-const bot = new Bot(''); // ← свой токен
+const bot = new Bot('8521440083:AAHF6d5686GG3g8qOH6vSpRGIGy0gW05RpY'); // ← свой токен
 
 const webappUrl = 'https://reservecoffee1miniapp.vercel.app/'; // ← свой URL
 
