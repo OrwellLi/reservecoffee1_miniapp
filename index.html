@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Поиск мест</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.11.1/dist/geosearch.css" />
+    <script src="https://api-maps.yandex.ru/v3/?apikey=ТВОЙ_API_КЛЮЧ&lang=ru_RU" type="text/javascript"></script> <!-- ← ВСТАВЬ СВОЙ КЛЮЧ ЗДЕСЬ! -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,7 +21,7 @@
     <main>
         <!-- Вкладка 1: Рядом -->
         <section id="nearby" class="tab-content active">
-            <div id="nearby-map"></div>
+            <div id="nearby-map" style="width: 100%; height: 400px;"></div>
             <p id="geo-status">Получаем вашу позицию...</p>
         </section>
         
@@ -32,7 +31,7 @@
                 <input type="text" id="search-input" placeholder="Введите название или адрес">
                 <button id="search-btn">Найти</button>
             </div>
-            <div id="search-map"></div>
+            <div id="search-map" style="width: 100%; height: 400px;"></div>
         </section>
         
         <!-- Вкладка 3: Избранное -->
@@ -42,8 +41,6 @@
         </section>
     </main>
     
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-geosearch@3.11.1/dist/geosearch.umd.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
