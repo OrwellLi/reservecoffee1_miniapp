@@ -2,24 +2,34 @@
 const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
 
 // Инициализация с обработкой ошибок
+// ПЛЕЙСХОЛДЕР ДЛЯ КЛЮЧА (будет заменён при билде на Vercel)
+const API_KEY_PLACEHOLDER = 'your-key-here';  // ← Здесь будет твой ключ
+
+// Инициализация (остальной код без изменений)
 document.addEventListener('DOMContentLoaded', () => {
-    if (typeof ymaps === 'undefined') {
-        console.error('Yandex Maps API не загружен. Проверь ключ и CSP.');
-        document.getElementById('geo-status').textContent = 'Ошибка загрузки карты. Проверь интернет.';
+    if (API_KEY_PLACEHOLDER === 'your-key-here') {
+        console.error('Ключ Яндекс не подставлен!');
+        // Показать ошибку на экране
+        document.body.innerHTML += '<div style="padding:20px;background:red;color:white;text-align:center;">Ошибка: добавь VITE_YANDEX_API_KEY в Vercel</div>';
         return;
     }
-    
-    ymaps.ready(() => {
-        console.log('Yandex Maps готов!');
-        initTabs();
-        initNearby();
-        initSearch();
-    }).catch(err => {
-        console.error('Ошибка ymaps.ready():', err);
-    });
-    
-    initFavorites();
+
+    // Загрузка Яндекс API с плейсхолдером (теперь с ключом)
+    const script = document.createElement('script');
+    script.src = `https://api-maps.yandex.ru/v3/?apikey=${API_KEY_PLACEHOLDER}&lang=ru_RU`;
+    script.async = true;
+    script.onload = () => {
+        console.log('Yandex Maps загружен');
+        ymaps.ready(() => {
+            initTabs();
+            initNearby();
+            initSearch();
+        });
+    };
+    document.head.appendChild(script);
 });
+
+initFavorites();  // Избранное
 
 // Вкладки (с проверкой элементов)
 function initTabs() {
