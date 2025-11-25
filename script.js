@@ -1,182 +1,155 @@
-// Проверка на Telegram WebApp
-const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
+// ПЛЕЙСХОЛДЕР ДЛЯ КЛЮЧА (заменяется на Vercel при npm run build)
+const API_KEY_PLACEHOLDER = 'your-key-here';
 
-// Инициализация с обработкой ошибок
-// ПЛЕЙСХОЛДЕР ДЛЯ КЛЮЧА (будет заменён при билде на Vercel)
-const API_KEY_PLACEHOLDER = 'your-key-here';  // ← Здесь будет твой ключ
+// Глобальные переменные
+let nearbyMap, searchMap;
+const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
 
-// Инициализация (остальной код без изменений)
+// === ЗАГРУЗКА ЯНДЕКС КАРТ ===
 document.addEventListener('DOMContentLoaded', () => {
     if (API_KEY_PLACEHOLDER === 'your-key-here') {
-        console.error('Ключ Яндекс не подставлен!');
-        // Показать ошибку на экране
-        document.body.innerHTML += '<div style="padding:20px;background:red;color:white;text-align:center;">Ошибка: добавь VITE_YANDEX_API_KEY в Vercel</div>';
+        document.body.innerHTML += '<div style="padding:20px;background:red;color:white;text-align:center;">ОШИБКА: ключ Яндекса не подставлен!</div>';
         return;
     }
 
-    // Загрузка Яндекс API с плейсхолдером (теперь с ключом)
     const script = document.createElement('script');
     script.src = `https://api-maps.yandex.ru/v3/?apikey=${API_KEY_PLACEHOLDER}&lang=ru_RU`;
     script.async = true;
     script.onload = () => {
-        console.log('Yandex Maps загружен');
-        ymaps.ready(() => {
-            initTabs();
-            initNearby();
-            initSearch();
-        });
+        console.log('Yandex Maps API загружен');
+        ymaps.ready(initApp);
     };
+    script.onerror = () => console.error('Ошибка загрузки Yandex Maps');
     document.head.appendChild(script);
 });
 
-initFavorites();  // Избранное
-
-// Вкладки (с проверкой элементов)
-function initTabs() {
-    const tabs = document.querySelectorAll('.tab-btn');
-    const contents = document.querySelectorAll('.tab-content');
-    if (tabs.length === 0) {
-        console.error('Кнопки вкладок не найдены!');
-        return;
-    }
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            contents.forEach(c => c.classList.remove('active'));
-            tab.classList.add('active');
-            const target = document.getElementById(tab.dataset.tab);
-            if (target) target.classList.add('active');
-        });
-    });
-    console.log('Вкладки инициализированы');
+function initApp() {
+    initTabs();
+    initNearby();
+    initSearch();
+    initFavorites();
 }
 
-// Вкладка 1: Рядом
-let nearbyMap;
-function initNearby() {
-    const status = document.getElementById('geo-status');
-    if (!status) return;
-    
-    // В Telegram используем requestLocation для лучшей совместимости
-    if (isTelegram) {
-        Telegram.WebApp.requestLocation().then(position => {
-            const lat = position.latitude;
-            const lng = position.longitude;
-            createNearbyMap(lat, lng);
-            status.textContent = 'Позиция получена. Ищем места...';
-            findNearbyPlaces(lat, lng);
-        }).catch(() => {
-            status.textContent = 'Разрешите геолокацию в настройках.';
-            createNearbyMap(55.7558, 37.6176); // Fallback: Москва
+// === ВКЛАДКИ ===
+function initTabs() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
         });
+    });
+}
+
+// === ВКЛАДКА "РЯДОМ" — ГЕОЛОКАЦИЯ ЧЕРЕЗ TELEGRAM ===
+function initNearby() {
+    const statusEl = document.getElementById('geo-status');
+
+    if (window.Telegram?.WebApp) {
+        Telegram.WebApp.requestLocation()
+            .then(loc => {
+                statusEl.textContent = 'Вы здесь!';
+                createNearbyMap(loc.latitude, loc.longitude);
+                findNearbyPlaces(loc.latitude, loc.longitude);
+            })
+            .catch(() => {
+                statusEl.textContent = 'Разрешите доступ к местоположению в Telegram';
+                createNearbyMap(55.7558, 37.6176); // Москва fallback
+            });
     } else {
-        // Обычная геолокация
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                pos => {
-                    const lat = pos.coords.latitude;
-                    const lng = pos.coords.longitude;
-                    createNearbyMap(lat, lng);
-                    status.textContent = 'Позиция получена. Ищем места...';
-                    findNearbyPlaces(lat, lng);
-                },
-                () => {
-                    status.textContent = 'Разрешите геолокацию.';
-                    createNearbyMap(55.7558, 37.6176);
-                }
-            );
-        } else {
-            status.textContent = 'Геолокация не поддерживается.';
-            createNearbyMap(55.7558, 37.6176);
-        }
+        statusEl.textContent = 'Откройте в Telegram';
+        createNearbyMap(55.7558, 37.6176);
     }
 }
 
 function createNearbyMap(lat, lng) {
     nearbyMap = new ymaps.Map('nearby-map', {
         center: [lat, lng],
-        zoom: 15
+        zoom: 15,
+        controls: ['zoomControl']
     });
-    console.log('Карта "Рядом" создана');
+
+    new ymaps.Placemark([lat, lng], {
+        hintContent: 'Вы здесь',
+        balloonContent: 'Ваше местоположение'
+    }, {
+        preset: 'islands#blueCircleDotIcon',
+        iconColor: '#3b82f6'
+    }).addTo(nearbyMap);
 }
 
 async function findNearbyPlaces(lat, lng) {
-    if (!nearbyMap) return;
     try {
-        const query = `кафе near ${lat}, ${lng}`;
-        const res = await ymaps.geocode(query, { results: 5 });
-        res.geoObjects.each((obj) => {
+        const res = await ymaps.geocode(`кафе near ${lat},${lng}`, { results: 8 });
+        res.geoObjects.each(obj => {
             const coords = obj.geometry.getCoordinates();
-            const name = obj.properties.get('name') || obj.properties.get('text') || 'Место';
+            const name = obj.properties.get('name') || obj.properties.get('text') || 'Кафе';
             const placemark = new ymaps.Placemark(coords, {
-                balloonContent: `<b>${name}</b><br><button class="add-fav-btn" onclick="addToFavorites('${name}', ${coords[0]}, ${coords[1]})">Добавить в избранное</button>`
+                balloonContent: `<b>${name}</b><br><button onclick="addToFavorites('${name}',${coords[0]},${coords[1]})" style="margin-top:8px;padding:6px 12px;background:#007bff;color:white;border:none;border-radius:4px;cursor:pointer;">В избранное ⭐</button>`
             });
             nearbyMap.geoObjects.add(placemark);
         });
-        console.log('Места добавлены на карту');
-    } catch (err) {
-        console.error('Ошибка поиска мест:', err);
+    } catch (e) {
+        console.error('Ошибка поиска мест:', e);
     }
 }
 
-// Вкладка 2: Поиск
-let searchMap;
+// === ВКЛАДКА "ПОИСК" ===
 function initSearch() {
     searchMap = new ymaps.Map('search-map', { center: [55.7558, 37.6176], zoom: 10 });
-    console.log('Карта "Поиск" создана');
-    
-    // Кнопка поиска (с проверкой)
-    const searchBtn = document.getElementById('search-btn');
-    if (searchBtn) {
-        searchBtn.addEventListener('click', handleSearch);
-    } else {
-        console.error('Кнопка поиска не найдена!');
-    }
-}
 
-function handleSearch() {
-    const input = document.getElementById('search-input');
-    if (!input || !input.value) {
-        alert('Введите запрос!');
-        return;
-    }
-    const query = input.value;
-    
-    ymaps.suggest(query).then(suggests => {
-        if (suggests.length === 0) return alert('Ничего не найдено');
-        const first = suggests[0];
-        ymaps.geocode(first.value).then(res => {
-            const coords = res.geoObjects.get(0).geometry.getCoordinates();
-            searchMap.setCenter(coords, 15);
-            const placemark = new ymaps.Placemark(coords, {
-                balloonContent: `<b>${first.value}</b><br><button class="add-fav-btn" onclick="addToFavorites('${first.value}', ${coords[0]}, ${coords[1]})">Добавить в избранное</button>`
+    document.getElementById('search-btn').addEventListener('click', () => {
+        const query = document.getElementById('search-input').value.trim();
+        if (!query) return;
+
+        ymaps.suggest(query).then(items => {
+            if (items.length === 0) return alert('Ничего не найдено');
+            ymaps.geocode(items[0].value).then(res => {
+                const obj = res.geoObjects.get(0);
+                const coords = obj.geometry.getCoordinates();
+                searchMap.setCenter(coords, 16);
+                new ymaps.Placemark(coords, {
+                    balloonContent: `<b>${items[0].displayName}</b><br><button onclick="addToFavorites('${items[0].displayName}',${coords[0]},${coords[1]})" style="margin-top:8px;padding:6px 12px;background:#007bff;color:white;border:none;border-radius:4px;cursor:pointer;">В избранное ⭐</button>`
+                }).addTo(searchMap);
             });
-            searchMap.geoObjects.add(placemark);
-        }).catch(err => console.error('Ошибка геокода:', err));
-    }).catch(err => console.error('Ошибка suggest:', err));
+        });
+    });
 }
 
-// Вкладка 3: Избранное (без изменений, но с логами)
-let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+// === ИЗБРАННОЕ ===
 function initFavorites() {
     renderFavorites();
-    const clearBtn = document.getElementById('clear-fav');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-            favorites = [];
-            localStorage.setItem('favorites', JSON.stringify(favorites));
-            renderFavorites();
-        });
-    }
+    document.getElementById('clear-fav').addEventListener('click', () => {
+        if (confirm('Очистить избранное?')) {
+            localStorage.removeItem('favorites');
+            location.reload();
+        }
+    });
 }
 
 function renderFavorites() {
     const list = document.getElementById('favorites-list');
-    if (!list) return;
-    list.innerHTML = favorites.map((fav, index) => `
-        <li>
-            <span>${fav.name} (${fav.lat.toFixed(4)}, ${fav.lng.toFixed(4)})</span>
-            <button onclick="removeFromFavorites(${index})">Удалить</button>
+    const empty = document.getElementById('favorites-empty');
+    const clearBtn = document.getElementById('clear-fav');
+
+    if (favorites.length === 0) {
+        list.innerHTML = '';
+        empty.style.display = 'block';
+        clearBtn.style.display = 'none';
+        return;
+    }
+
+    empty.style.display = 'none';
+    clearBtn.style.display = 'block';
+
+    list.innerHTML = favorites.map((f, i) => `
+        <li style="padding:12px;background:white;margin:8px 0;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+            <span><b>${f.name}</b></span>
+            <div>
+                <button onclick="openInMap(${f.lat},${f.lng})" style="margin-right:8px;padding:6px 10px;background:#28a745;color:white;border:none;border-radius:4px;">Открыть</button>
+                <button onclick="removeFromFavorites(${i})" style="padding:6px 10px;background:#dc3545;color:white;border:none;border-radius:4px;">✕</button>
+            </div>
         </li>
     `).join('');
 }
@@ -185,7 +158,7 @@ function addToFavorites(name, lat, lng) {
     favorites.push({ name, lat, lng });
     localStorage.setItem('favorites', JSON.stringify(favorites));
     renderFavorites();
-    console.log('Добавлено в избранное:', name);
+    alert('Добавлено в избранное ⭐');
 }
 
 function removeFromFavorites(index) {
@@ -194,9 +167,10 @@ function removeFromFavorites(index) {
     renderFavorites();
 }
 
-// Telegram интеграция (опционально, для MainButton)
-if (isTelegram) {
-    Telegram.WebApp.ready();
-    Telegram.WebApp.expand();
-    Telegram.WebApp.MainButton.setText('Обновить карту').onClick(() => location.reload()).show();
+function openInMap(lat, lng) {
+    document.querySelector('[data-tab="nearby"]').click();
+    createNearbyMap(lat, lng);
 }
+
+// Глобально доступная функция для кнопок в балунах
+window.addToFavorites = addToFavorites;
