@@ -39,21 +39,42 @@ function initTabs() {
 function initNearby() {
   const status = document.getElementById("geo-status");
 
-  if (!Telegram?.WebApp) {
+  // Если не в Telegram — fallback
+  if (!window.Telegram?.WebApp) {
     status.textContent = "Откройте в Telegram";
     createMap("nearby-map", 55.7558, 37.6176);
     return;
   }
 
+  // Принудительно показываем кнопку "Поделиться геопозицией"
+  Telegram.WebApp.MainButton.setText("Поделиться местоположением")
+    .show()
+    .onClick(() => {
+      Telegram.WebApp.requestLocation()
+        .then(pos => {
+          Telegram.WebApp.MainButton.hide();
+          status.textContent = "Вы здесь!";
+          createMap("nearby-map", pos.latitude, pos.longitude);
+          findCafes(pos.latitude, pos.longitude);
+        })
+        .catch(() => {
+          status.textContent = "Вы отменили геолокацию";
+          Telegram.WebApp.MainButton.hide();
+          createMap("nearby-map", 55.7558, 37.6176);
+        });
+    });
+
+  // Автоматический запрос (на случай, если разрешение уже есть)
   Telegram.WebApp.requestLocation()
     .then(pos => {
+      Telegram.WebApp.MainButton.hide();
       status.textContent = "Вы здесь!";
       createMap("nearby-map", pos.latitude, pos.longitude);
       findCafes(pos.latitude, pos.longitude);
     })
     .catch(() => {
-      status.textContent = "Разрешите геолокацию в Telegram";
-      createMap("nearby-map", 55.7558, 37.6176);
+      status.textContent = "Нажмите кнопку ниже, чтобы поделиться местоположением";
+      // Кнопка уже показана выше
     });
 }
 
